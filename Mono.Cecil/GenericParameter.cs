@@ -185,7 +185,7 @@ namespace Mono.Cecil {
 
 		}
 
-		internal GenericParameter (int position, GenericParameterType type, ModuleDefinition module)
+		public GenericParameter (int position, GenericParameterType type, ModuleDefinition module)
 			: base (string.Empty, string.Empty)
 		{
 			Mixin.CheckModule (module);

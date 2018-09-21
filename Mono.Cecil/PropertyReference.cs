@@ -27,7 +27,7 @@ namespace Mono.Cecil {
 			get;
 		}
 
-		internal PropertyReference (string name, TypeReference propertyType)
+		public PropertyReference (string name, TypeReference propertyType)
 			: base (name)
 		{
 			Mixin.CheckType (propertyType, Mixin.Argument.propertyType);
