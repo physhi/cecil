@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ProjectGuid>{FBC6DD59-D09D-499C-B03C-99C1C78FF2AC}</ProjectGuid>
     <RootNamespace>Mono.Cecil.Rocks</RootNamespace>
-    <AssemblyName>Mono.Cecil.Rocks</AssemblyName>
+    <AssemblyName>Mono.Cecil.Rocks.Private</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\ProjectInfo.cs" />
