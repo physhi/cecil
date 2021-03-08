@@ -35,12 +35,11 @@ namespace Mono.Cecil.Pdb {
 			this.pdb_file = file;
 		}
 
-#if !READ_ONLY
 		public ISymbolWriterProvider GetWriterProvider ()
 		{
 			return new NativePdbWriterProvider ();
 		}
-#endif
+
 		/*
 		uint Magic = 0x53445352;
 		Guid Signature;
@@ -91,17 +90,12 @@ namespace Mono.Cecil.Pdb {
 		bool PopulateFunctions ()
 		{
 			using (pdb_file) {
-				Dictionary<uint, PdbTokenLine> tokenToSourceMapping;
-				string sourceServerData;
-				int age;
-				Guid guid;
+				var info = PdbFile.LoadFunctions (pdb_file.value);
 
-				var funcs = PdbFile.LoadFunctions (pdb_file.value, out tokenToSourceMapping,  out sourceServerData, out age, out guid);
-
-				if (this.guid != guid)
+				if (this.guid != info.Guid)
 					return false;
 
-				foreach (PdbFunction function in funcs)
+				foreach (PdbFunction function in info.Functions)
 					functions.Add (function.token, function);
 			}
 
@@ -183,12 +177,12 @@ namespace Mono.Cecil.Pdb {
 				parent.variables = new Collection<VariableDebugInformation> (scope.slots.Length);
 
 				foreach (PdbSlot slot in scope.slots) {
-					if (slot.flags == 1) // parameter names
+					if ((slot.flags & 1) != 0) // parameter names
 						continue;
 
 					var index = (int) slot.slot;
 					var variable = new VariableDebugInformation (index, slot.name);
-					if (slot.flags == 4)
+					if ((slot.flags & 4) != 0)
 						variable.IsDebuggerHidden = true;
 					parent.variables.Add (variable);
 				}
@@ -358,9 +352,11 @@ namespace Mono.Cecil.Pdb {
 				return document;
 
 			document = new Document (name) {
-				Language = source.language.ToLanguage (),
-				LanguageVendor = source.vendor.ToVendor (),
-				Type = source.doctype.ToType (),
+				LanguageGuid = source.language,
+				LanguageVendorGuid = source.vendor,
+				TypeGuid = source.doctype,
+				HashAlgorithmGuid = source.checksumAlgorithm,
+				Hash = source.checksum,
 			};
 			documents.Add (name, document);
 			return document;

@@ -180,6 +180,8 @@ namespace Mono.Cecil.Tests {
 
 			TestModule("winrtcomp.winmd", module => {
 				Assert.IsTrue (module.Assembly.Name.IsWindowsRuntime);
+				Assert.AreEqual (6, module.Image.SubSystemMajor);
+				Assert.AreEqual (2, module.Image.SubSystemMinor);
 			}, verify: false, assemblyResolver: resolver);
 		}
 #endif
@@ -196,7 +198,29 @@ namespace Mono.Cecil.Tests {
 			});
 		}
 
-#if !READ_ONLY
+		[Test]
+		public void Net471TargetingAssembly ()
+		{
+			TestModule ("net471.exe", module => {
+				Assert.AreEqual (6, module.Image.SubSystemMajor);
+				Assert.AreEqual (0, module.Image.SubSystemMinor);
+			});
+		}
+
+		[Test]
+		public void LocallyScopedConstantArray ()
+		{
+			TestModule ("LocallyScopedConstantArray.dll", module => {
+				Assert.IsTrue (module.HasDebugHeader);
+				var method = module.Types
+					.Single (x => x.Name == "TestClass")
+					.Methods
+					.Single (x => x.Name == "TestMethod");
+				var debugInformation = method.DebugInformation;
+				Assert.IsNull (debugInformation.Scope.Constants.Single ().Value);
+			}, symbolReaderProvider: typeof (PortablePdbReaderProvider), symbolWriterProvider: typeof (PortablePdbWriterProvider));
+		}
+
 		[Test]
 		public void ExternalPdbDeterministicAssembly ()
 		{
@@ -225,6 +249,5 @@ namespace Mono.Cecil.Tests {
 				Assert.IsTrue (header.Entries.Any (e => e.Directory.Type == ImageDebugType.EmbeddedPortablePdb));
 			}, symbolReaderProvider: typeof (EmbeddedPortablePdbReaderProvider), symbolWriterProvider: typeof (EmbeddedPortablePdbWriterProvider));
 		}
-#endif
 	}
 }
